@@ -47,7 +47,7 @@ private val LightColorScheme = lightColorScheme(
 fun HashCalculatorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Fix: This fucked my life.
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

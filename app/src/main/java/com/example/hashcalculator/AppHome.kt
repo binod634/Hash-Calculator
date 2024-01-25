@@ -1,5 +1,6 @@
 package com.example.hashcalculator
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,19 +22,26 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.hashcalculator.hashAlgorithm.AlgorithmData
 import com.example.hashcalculator.uiLayout.HashFromFile
 import com.example.hashcalculator.uiLayout.HashFromText
 import com.example.hashcalculator.uiLayout.HashType
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHome() {
+fun AppHome(appViewModel: AppViewModel) {
+    val context = LocalContext.current
+    val gotHash = appViewModel.calculatedHash.value
     val currentlySelectedTabIndex = remember { mutableIntStateOf(0) }
     val tabs = listOf(HashType.Text.name, HashType.File.name)
+    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -68,7 +76,7 @@ fun AppHome() {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = currentlySelectedTabIndex.intValue == index,
-                            onClick = { currentlySelectedTabIndex.intValue = index },
+                            onClick = { currentlySelectedTabIndex.intValue = index; appViewModel.clearHash() },
                             modifier = Modifier.height(50.dp)
                         ) {
                             Text(
@@ -78,8 +86,27 @@ fun AppHome() {
                     }
                 }
                 when (currentlySelectedTabIndex.intValue) {
-                    0 -> HashFromText()
-                    1 -> HashFromFile()
+                    0 -> HashFromText(
+                        gotHash,
+                        selectedAlgorithm = appViewModel.currentlySelectedAlgorithm.value,
+                        changeAlgorithm = { algorithmData: AlgorithmData ->
+                            appViewModel.changeAlgorithm(algorithmData)
+                        }) { str: String ->
+                        scope.launch {
+                            appViewModel.calculateFromText(str)
+                        }
+                    }
+
+                    1 -> HashFromFile(
+                        gotHash,
+                        selectedAlgorithm = appViewModel.currentlySelectedAlgorithm.value,
+                        changeAlgorithm = { algorithmData: AlgorithmData ->
+                            appViewModel.changeAlgorithm(algorithmData)
+                        }) { uri:Uri? ->
+                        scope.launch {
+                            appViewModel.calculateFromFile(uri,context)
+                        }
+                    }
                 }
             }
         }

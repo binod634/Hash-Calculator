@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,31 +13,33 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toFile
 import com.example.hashcalculator.R
+import com.example.hashcalculator.hashAlgorithm.AlgorithmData
 
 
 @Composable
-fun HashFromFile() {
+fun HashFromFile(
+    gotHash: String?,
+    selectedAlgorithm: AlgorithmData,
+    changeAlgorithm: (AlgorithmData) -> Unit,
+    calculateHash: (Uri?) -> Unit
+) {
     val context = LocalContext.current
     val selectedFile = remember { mutableStateOf<Uri?>(null) }
-    val showButtonToast = Toast.makeText(context, "Button Clicked.", Toast.LENGTH_SHORT)
     val showUploadToast = Toast.makeText(context, "Select File.", Toast.LENGTH_SHORT)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
@@ -47,7 +48,7 @@ fun HashFromFile() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 160.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 128.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -70,12 +71,15 @@ fun HashFromFile() {
                 )
             }
             Row {
-                ShowAlgorithmDropDownMenu()
+                ShowAlgorithmDropDownMenu(selectedAlgorithm) { algorithm: AlgorithmData ->
+                    changeAlgorithm(algorithm)
+                }
                 Spacer(modifier = Modifier.width(20.dp))
-                Button(onClick = { showButtonToast.show() }) {
+                Button(onClick = { calculateHash(selectedFile.value) }) {
                     Text(text = "Generate")
                 }
             }
+            ShowHashOutput(gotHash)
         }
     }
 }

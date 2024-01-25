@@ -16,10 +16,11 @@ class CalculateHashImpl : CalculateHash {
     override fun fromText(str:String, algorithmData: AlgorithmData): String {
         val digest = MessageDigest.getInstance(algorithmData.name)
         return try {
-            digest.update(str.toByte())
+            digest.update(str.toByteArray())
             digest.digest().toHexString(HexFormat.Default)
         } catch (e:Exception) {
-            "Error"
+            Log.e("Tag_Error",e.stackTraceToString())
+            return "Error"
         }
 
     }

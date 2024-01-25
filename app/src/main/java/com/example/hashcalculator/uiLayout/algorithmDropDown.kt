@@ -13,25 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
 import com.example.hashcalculator.hashAlgorithm.AlgorithmData
 import com.example.hashcalculator.hashAlgorithm.algorithmList
 
 @Composable
-fun ShowAlgorithmDropDownMenu() {
+fun ShowAlgorithmDropDownMenu(selectedAlgorithm:AlgorithmData,changeAlgorithm:(AlgorithmData) -> Unit) {
     val showDropDownMenu = remember {
         mutableStateOf(false)
-    }
-    val selectedAlgorithm = remember {
-        mutableStateOf(algorithmList.first())
     }
     Column {
         Button(
             onClick = { showDropDownMenu.value = !showDropDownMenu.value },
             shape = if (showDropDownMenu.value) RectangleShape else ButtonDefaults.shape
         ) {
-            Text(text = selectedAlgorithm.value.name)
+            Text(text = selectedAlgorithm.name)
             Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(
@@ -41,7 +36,8 @@ fun ShowAlgorithmDropDownMenu() {
                 DropdownMenuItem(
                     text = { Text(text = algorithm.name) },
                     onClick = {
-                        selectedAlgorithm.value = algorithm;showDropDownMenu.value = false
+                        showDropDownMenu.value = false
+                        changeAlgorithm(algorithm)
                     },
                     enabled = algorithm.isAvailable
                 )
